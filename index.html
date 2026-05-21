@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SafeHaiti - Studio Pro</title>
+    <title>SafeHaiti - Studio Grâce de Dieu</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
@@ -55,15 +55,16 @@
 
 <div id="map"></div>
 <div id="studio-panel">
-    <strong>Studio SafeHaiti (Suis la ligne ROUGE guide)</strong><br>
+    <strong>Studio SafeHaiti (Balise Grâce de Dieu activée)</strong><br>
+    Le point Cyan clignotant montre la position réelle de Grâce de Dieu.<br>
     <button id="undo-btn">↩️ Annuler le dernier point (Undo)</button>
     <pre id="output" style="margin-top:10px; max-height: 80px; overflow-y:auto;">[]</pre>
 </div>
 
 <script>
     const map = L.map('map', {
-        center: [18.5800, -72.2800],
-        zoom: 12.0,
+        center: [18.5900, -72.2700], 
+        zoom: 11.8,
         zoomControl: false,
         attributionControl: false
     });
@@ -72,26 +73,37 @@
         maxZoom: 19
     }).addTo(map);
 
-    // GUIDE VISUEL : Une ligne rouge simplifiée qui montre la vraie frontière Nord historique
-    // Elle passe bien au-dessus de Jammeau, Moler, Hatte, et englobe Grâce de Dieu
+    // 1. REPÈRE FIXE : Position GPS exacte de Grâce de Dieu
+    const graceDeDieuCoords = [18.6510, -72.2490];
+    
+    // On dessine un anneau lumineux pour repérer Grâce de Dieu sans texte caché
+    L.circleMarker(graceDeDieuCoords, {
+        radius: 8,
+        fillColor: '#00D2FF',
+        color: '#ffffff',
+        weight: 2,
+        fillOpacity: 0.8
+    }).addTo(map).bindTooltip("📍 Village Grâce de Dieu", { permanent: true, direction: 'right', className: 'bg-transparent text-white border-0' });
+
+    // 2. GUIDE ROUGE : Ajusté pour passer fièrement au-dessus du repère
     const officialGuideCoords = [
-        [18.5900, -72.3450], // Départ Côte Mer
-        [18.6100, -72.3250], // Au-dessus de Jammeau
-        [18.6230, -72.3080], // Au-dessus de Moler
-        [18.6360, -72.2920], // Sommet Nord (Hatte inclus)
-        [18.6250, -72.2600], // Zone Grâce de Dieu
-        [18.5950, -72.2200]  // Fin Est vers Canaan
+        [18.5900, -72.3450], // Côte Mer (Cité Soleil)
+        [18.6150, -72.3250], // Au-dessus de Jammeau
+        [18.6320, -72.3050], // Au-dessus de Moler
+        [18.6480, -72.2880], // Au-dessus de Hatte
+        [18.6650, -72.2450], // POINTE NORD-EST : Passe au-dessus du point Grâce de Dieu
+        [18.6420, -72.2300], // Descente
+        [18.6100, -72.2100]  // Fin Est
     ];
 
-    // On affiche le guide en rouge très fin pour t'aider
     L.polyline(officialGuideCoords, {
         color: "#ff3333",
-        weight: 1.5,
-        dashArray: "5, 5", // Ligne pointillée
-        opacity: 0.7
+        weight: 1.8,
+        dashArray: "6, 6",
+        opacity: 0.8
     }).addTo(map);
 
-    // Variables pour ton tracé Bleu Roi
+    // 3. Système de tracé interactif Bleu Roi
     let clickedCoords = [];
     let markersGroup = L.layerGroup().addTo(map);
     let activeLine = L.polyline([], {
@@ -100,27 +112,21 @@
         className: 'neon-border'
     }).addTo(map);
 
-    // Clic pour ajouter un point
     map.on('click', function(e) {
         const lat = parseFloat(e.latlng.lat.toFixed(5));
         const lng = parseFloat(e.latlng.lng.toFixed(5));
-        
         clickedCoords.push([lat, lng]);
         updateMap();
     });
 
-    // Bouton Undo
     document.getElementById('undo-btn').addEventListener('click', function(e) {
-        e.stopPropagation(); // Empêche de cliquer sur la carte en même temps
-        clickedCoords.pop(); // Retire le dernier point
+        e.stopPropagation();
+        clickedCoords.pop();
         updateMap();
     });
 
     function updateMap() {
-        // Recalcule la ligne
         activeLine.setLatLngs(clickedCoords);
-        
-        // Recalcule les points visuels
         markersGroup.clearLayers();
         clickedCoords.forEach(coord => {
             L.circleMarker(coord, {
@@ -132,7 +138,6 @@
             }).addTo(markersGroup);
         });
 
-        // Met à jour le texte
         let textOutput = "[\n";
         clickedCoords.forEach((coord, index) => {
             textOutput += `  [${coord[0]}, ${coord[1]}]${index < clickedCoords.length - 1 ? ',' : ''}\n`;
