@@ -14,7 +14,6 @@
             height: 100%;
             background-color: #121212;
         }
-        /* Style sombre pour la carte */
         .leaflet-container {
             background: #121212 !important;
         }
@@ -25,31 +24,37 @@
 <div id="map"></div>
 
 <script>
-    // 1. Centrage initial sur la zone métropolitaine de Port-au-Prince
+    // 1. Vue initiale : Très large sur toute la carte d'Haïti
     const map = L.map('map', {
-        center: [18.5392, -72.3350], 
-        zoom: 12,
+        center: [18.9712, -72.2852], // Centre géographique d'Haïti
+        zoom: 8, // Zoom éloigné pour tout voir
         zoomControl: false,
         attributionControl: false
     });
 
-    // 2. Fond de carte ultra-minimaliste et sombre (CartoDB Dark Matter)
+    // 2. Fond de carte sombre
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         maxZoom: 19
     }).addTo(map);
 
-    // Fonction pour envoyer la commune cliquée à FlutterFlow
+    // 3. L'Animation "FlyTo" automatique après 1 seconde
+    setTimeout(() => {
+        map.flyTo([18.5392, -72.3350], 12.5, {
+            animate: true,
+            duration: 2.5 // Durée du plongeon en secondes (fluide et dynamique)
+        });
+    }, 1000); // Attend 1 seconde après le chargement avant de plonger
+
+    // Fonction passerelle FlutterFlow
     function selectCommune(name) {
         if (window.FlutterFlowHorizPlatform && window.FlutterFlowHorizPlatform.postMessage) {
             window.FlutterFlowHorizPlatform.postMessage(name);
         } else if (window.chrome && window.chrome.webview) {
             window.chrome.webview.postMessage(name);
         } else {
-            console.log("Message envoyé à l'app : " + name);
+            console.log("Message envoyé : " + name);
         }
     }
-
-    // Prochaine étape : Injection des frontières GeoJSON ici
 </script>
 </body>
 </html>
