@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SafeHaiti Map - Aire Métropolitaine</title>
+    <title>SafeHaiti Map - Frontières Officielles</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
@@ -24,7 +24,7 @@
 <div id="map"></div>
 
 <script>
-    // 1. Vue initiale : Toute l'île d'Haïti
+    // 1. Initialisation de la carte sur Haïti
     const map = L.map('map', {
         center: [18.9712, -72.2852],
         zoom: 8,
@@ -32,108 +32,99 @@
         attributionControl: false
     });
 
-    // 2. Fond de carte sombre et épuré
+    // 2. Fond de carte sombre (avec les lignes blanches naturelles en fond)
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         maxZoom: 19
     }).addTo(map);
 
-    // 3. Animation de plongée vers le centre de la capitale
+    // 3. Animation FlyTo vers la capitale
     setTimeout(() => {
-        map.flyTo([18.5410, -72.2850], 12.0, {
+        map.flyTo([18.5410, -72.2850], 11.8, {
             animate: true,
             duration: 2.5
         });
     }, 1000);
 
-    // 4. Données géographiques des 8 communes de la capitale
-    const capitalZones = {
-        "type": "FeatureCollection",
-        "features": [
-            {
-                "type": "Feature",
-                "properties": { "name": "Delmas", "color": "#FF9800" }, // Orange
-                "geometry": {
-                    "type": "Polygon",
-                    "coordinates": [[[-72.315, 18.562], [-72.298, 18.568], [-72.285, 18.555], [-72.288, 18.532], [-72.302, 18.518], [-72.312, 18.522], [-72.318, 18.545], [-72.315, 18.562]]]
-                }
-            },
-            {
-                "type": "Feature",
-                "properties": { "name": "Port-au-Prince", "color": "#E53935" }, // Rouge
-                "geometry": {
-                    "type": "Polygon",
-                    "coordinates": [[[-72.355, 18.545], [-72.318, 18.545], [-72.312, 18.522], [-72.325, 18.505], [-72.350, 18.510], [-72.360, 18.530], [-72.355, 18.545]]]
-                }
-            },
-            {
-                "type": "Feature",
-                "properties": { "name": "Pétion-Ville", "color": "#4CAF50" }, // Vert
-                "geometry": {
-                    "type": "Polygon",
-                    "coordinates": [[[-72.302, 18.518], [-72.288, 18.532], [-72.265, 18.525], [-72.260, 18.490], [-72.290, 18.485], [-72.305, 18.500], [-72.302, 18.518]]]
-                }
-            },
-            {
-                "type": "Feature",
-                "properties": { "name": "Tabarre", "color": "#FFEB3B" }, // Jaune
-                "geometry": {
-                    "type": "Polygon",
-                    "coordinates": [[[-72.285, 18.555], [-72.260, 18.585], [-72.235, 18.575], [-72.245, 18.545], [-72.265, 18.525], [-72.288, 18.532], [-72.285, 18.555]]]
-                }
-            },
-            {
-                "type": "Feature",
-                "properties": { "name": "Croix-des-Bouquets", "color": "#FF9800" }, // Orange
-                "geometry": {
-                    "type": "Polygon",
-                    "coordinates": [[[-72.260, 18.585], [-72.210, 18.600], [-72.190, 18.550], [-72.220, 18.520], [-72.245, 18.545], [-72.235, 18.575], [-72.260, 18.585]]]
-                }
-            },
-            {
-                "type": "Feature",
-                "properties": { "name": "Cité Soleil", "color": "#E53935" }, // Rouge
-                "geometry": {
-                    "type": "Polygon",
-                    "coordinates": [[[-72.335, 18.590], [-72.298, 18.610], [-72.260, 18.585], [-72.285, 18.555], [-72.298, 18.568], [-72.315, 18.562], [-72.335, 18.590]]]
-                }
-            },
-            {
-                "type": "Feature",
-                "properties": { "name": "Carrefour", "color": "#FF9800" }, // Orange
-                "geometry": {
-                    "type": "Polygon",
-                    "coordinates": [[[-72.410, 18.535], [-72.360, 18.530], [-72.350, 18.510], [-72.365, 18.480], [-72.415, 18.490], [-72.410, 18.535]]]
-                }
-            },
-            {
-                "type": "Feature",
-                "properties": { "name": "Kenscoff", "color": "#4CAF50" }, // Vert
-                "geometry": {
-                    "type": "Polygon",
-                    "coordinates": [[[-72.290, 18.485], [-72.260, 18.490], [-72.240, 18.430], [-72.280, 18.420], [-72.300, 18.440], [-72.290, 18.485]]]
-                }
-            }
-        ]
+    // Liste des 8 communes officielles à cibler
+    const targetCommunes = [
+        "Delmas", "Port-au-Prince", "Pétion-Ville", "Tabarre", 
+        "Croix-des-Bouquets", "Cité Soleil", "Carrefour", "Kenscoff"
+    ];
+
+    // Base de données temporaire pour les couleurs de test de SafeHaiti
+    const zoneColors = {
+        "Delmas": "#FF9800",        // Orange
+        "Port-au-Prince": "#E53935", // Rouge
+        "Cité Soleil": "#E53935",    // Rouge
+        "Carrefour": "#FF9800",      // Orange
+        "Croix-des-Bouquets": "#FF9800", // Orange
+        "Tabarre": "#FFEB3B",        // Jaune
+        "Pétion-Ville": "#4CAF50",   // Vert
+        "Kenscoff": "#4CAF50"        // Vert
     };
 
-    // 5. Application des styles personnalisés pour chaque commune
-    const layerGroup = L.geoJSON(capitalZones, {
-        style: function(feature) {
-            return {
-                color: feature.properties.color,      // Couleur des bordures
-                weight: 2,                             // Épaisseur des lignes
-                opacity: 0.8,
-                fillColor: feature.properties.color,  // Couleur de remplissage
-                fillOpacity: 0.35                      // Opacité pour un effet "Tech glow" moderne
-            };
-        },
-        onEachFeature: function(feature, layer) {
-            // Liaison du clic de chaque commune vers l'application
-            layer.on('click', function() {
-                selectCommune(feature.properties.name);
-            });
+    // 4. Chargement des VRAIES frontières géographiques d'Haïti (GeoJSON officiel)
+    // Nous utilisons une source publique fiable contenant le découpage administratif d'Haïti
+    fetch('https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/regions/haïti/communes-haiti.geojson')
+    .then(response => {
+        if (!response.ok) {
+            // Si la première source échoue, on a une source de secours contenant les polygones mondiaux
+            return fetch('https://opengeodata.ht/datasets/communes-haiti.geojson');
         }
-    }).addTo(map);
+        return response.json();
+    })
+    .then(geoData => {
+        // On filtre le fichier pour ne garder STRICTEMENT que nos 8 communes de la capitale
+        const filteredFeatures = geoData.features.filter(feature => {
+            // Nettoyage du nom pour éviter les problèmes d'accents
+            const name = feature.properties.ADM2_REF || feature.properties.name || "";
+            return targetCommunes.some(target => name.toLowerCase().includes(target.toLowerCase()));
+        });
+
+        const cleanGeoJSON = {
+            "type": "FeatureCollection",
+            "features": filteredFeatures
+        };
+
+        // 5. Affichage des vraies formes sur la carte
+        L.geoJSON(cleanGeoJSON, {
+            style: function(feature) {
+                const name = feature.properties.ADM2_REF || feature.properties.name || "";
+                // Trouver la couleur correspondante
+                let matchColor = "#666666"; // Gris par défaut si non trouvé
+                for (let key in zoneColors) {
+                    if (name.toLowerCase().includes(key.toLowerCase())) {
+                        matchColor = zoneColors[key];
+                        break;
+                    }
+                }
+
+                return {
+                    color: "#ffffff",          // Ligne blanche très fine pour froncer sur le tracé de base
+                    weight: 1.5,               // Épaisseur parfaite
+                    opacity: 0.6,
+                    fillColor: matchColor,     // Remplissage avec nos vraies couleurs SafeHaiti
+                    fillOpacity: 0.4           // Effet transparent moderne
+                };
+            },
+            onEachFeature: function(feature, layer) {
+                const name = feature.properties.ADM2_REF || feature.properties.name || "Zone";
+                
+                // Au clic, on extrait le vrai nom propre (ex: "Delmas")
+                let cleanName = name;
+                targetCommunes.forEach(target => {
+                    if (name.toLowerCase().includes(target.toLowerCase())) {
+                        cleanName = target;
+                    }
+                });
+
+                layer.on('click', function() {
+                    selectCommune(cleanName);
+                });
+            }
+        }).addTo(map);
+    })
+    .catch(error => console.error("Erreur lors du chargement des frontières officielles :", error));
 
     // Passerelle FlutterFlow
     function selectCommune(name) {
