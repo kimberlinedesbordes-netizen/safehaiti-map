@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SafeHaiti - Studio de Traçage</title>
+    <title>SafeHaiti - Studio Pro</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
@@ -17,8 +17,7 @@
         .leaflet-container {
             background: #121212 !important;
         }
-        /* Style du panneau de contrôle des coordonnées */
-        #coord-panel {
+        #studio-panel {
             position: absolute;
             bottom: 20px;
             left: 50%;
@@ -33,8 +32,19 @@
             font-size: 11px;
             z-index: 1000;
             width: 85%;
-            max-height: 150px;
-            overflow-y: auto;
+        }
+        button {
+            background: #4169E1;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        button:hover {
+            background: #00D2FF;
         }
         .neon-border {
             filter: drop-shadow(0px 0px 4px rgba(65, 105, 225, 0.9));
@@ -44,15 +54,15 @@
 <body>
 
 <div id="map"></div>
-<div id="coord-panel">
-    <strong>Studio de Traçage SafeHaiti</strong><br>
-    Clique sur la carte pour dessiner la frontière Nord (Passe par Jammeau, Hatte, Grâce de Dieu).<br>
-    <span id="output">[]</span>
+<div id="studio-panel">
+    <strong>Studio SafeHaiti (Suis la ligne ROUGE guide)</strong><br>
+    <button id="undo-btn">↩️ Annuler le dernier point (Undo)</button>
+    <pre id="output" style="margin-top:10px; max-height: 80px; overflow-y:auto;">[]</pre>
 </div>
 
 <script>
     const map = L.map('map', {
-        center: [18.5700, -72.2900], // Centré un peu plus haut pour bien voir le Nord
+        center: [18.5800, -72.2800],
         zoom: 12.0,
         zoomControl: false,
         attributionControl: false
@@ -62,42 +72,74 @@
         maxZoom: 19
     }).addTo(map);
 
-    // Tableau pour stocker tes points cliqués
+    // GUIDE VISUEL : Une ligne rouge simplifiée qui montre la vraie frontière Nord historique
+    // Elle passe bien au-dessus de Jammeau, Moler, Hatte, et englobe Grâce de Dieu
+    const officialGuideCoords = [
+        [18.5900, -72.3450], // Départ Côte Mer
+        [18.6100, -72.3250], // Au-dessus de Jammeau
+        [18.6230, -72.3080], // Au-dessus de Moler
+        [18.6360, -72.2920], // Sommet Nord (Hatte inclus)
+        [18.6250, -72.2600], // Zone Grâce de Dieu
+        [18.5950, -72.2200]  // Fin Est vers Canaan
+    ];
+
+    // On affiche le guide en rouge très fin pour t'aider
+    L.polyline(officialGuideCoords, {
+        color: "#ff3333",
+        weight: 1.5,
+        dashArray: "5, 5", // Ligne pointillée
+        opacity: 0.7
+    }).addTo(map);
+
+    // Variables pour ton tracé Bleu Roi
     let clickedCoords = [];
+    let markersGroup = L.layerGroup().addTo(map);
     let activeLine = L.polyline([], {
         color: "#4169E1",
         weight: 4,
         className: 'neon-border'
     }).addTo(map);
 
-    // Fonction qui capture tes clics en direct
+    // Clic pour ajouter un point
     map.on('click', function(e) {
         const lat = parseFloat(e.latlng.lat.toFixed(5));
         const lng = parseFloat(e.latlng.lng.toFixed(5));
         
-        // Ajoute le point
         clickedCoords.push([lat, lng]);
-        
-        // Met à jour la ligne sur ton écran
+        updateMap();
+    });
+
+    // Bouton Undo
+    document.getElementById('undo-btn').addEventListener('click', function(e) {
+        e.stopPropagation(); // Empêche de cliquer sur la carte en même temps
+        clickedCoords.pop(); // Retire le dernier point
+        updateMap();
+    });
+
+    function updateMap() {
+        // Recalcule la ligne
         activeLine.setLatLngs(clickedCoords);
         
-        // Ajoute un petit point de repère visuel
-        L.circleMarker(e.latlng, {
-            radius: 4,
-            fillColor: '#00D2FF',
-            color: '#4169E1',
-            weight: 1,
-            fillOpacity: 1
-        }).addTo(map);
+        // Recalcule les points visuels
+        markersGroup.clearLayers();
+        clickedCoords.forEach(coord => {
+            L.circleMarker(coord, {
+                radius: 4,
+                fillColor: '#00D2FF',
+                color: '#4169E1',
+                weight: 1,
+                fillOpacity: 1
+            }).addTo(markersGroup);
+        });
 
-        // Affiche la liste des coordonnées dans la boîte en bas
+        // Met à jour le texte
         let textOutput = "[\n";
         clickedCoords.forEach((coord, index) => {
             textOutput += `  [${coord[0]}, ${coord[1]}]${index < clickedCoords.length - 1 ? ',' : ''}\n`;
         });
         textOutput += "]";
         document.getElementById('output').innerText = textOutput;
-    });
+    }
 </script>
 </body>
 </html>
