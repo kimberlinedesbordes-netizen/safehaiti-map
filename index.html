@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SafeHaiti - Neon Matrix</title>
+    <title>SafeHaiti - Étape 1</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
@@ -12,15 +12,10 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            background-color: #0d0d11;
+            background-color: #121212;
         }
         .leaflet-container {
-            background: #0d0d11 !important;
-        }
-        /* Effet de lueur Néon Bleu Roi sur les lignes */
-        .neon-line {
-            filter: drop-shadow(0px 0px 5px rgba(65, 105, 225, 0.9)) 
-                    drop-shadow(0px 0px 10px rgba(0, 210, 255, 0.6));
+            background: #121212 !important;
         }
     </style>
 </head>
@@ -29,85 +24,42 @@
 <div id="map"></div>
 
 <script>
-    // 1. Initialisation de la carte
+    // 1. Vue initiale : Très large sur toute l'île d'Haïti au démarrage
     const map = L.map('map', {
-        center: [18.5410, -72.3150],
-        zoom: 12.5,
+        center: [18.9712, -72.2852],
+        zoom: 8,
         zoomControl: false,
         attributionControl: false
     });
 
-    // 2. Fond de carte "Noire Absolue" pour faire ressortir le néon
+    // 2. Fond de carte sombre et moderne
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        maxZoom: 19,
-        opacity: 0.7
+        maxZoom: 19
     }).addTo(map);
 
-    // 3. Tracé des axes de délimitation de la Capitale
-    const neonBoundaries = {
-        "type": "FeatureCollection",
-        "features": [
-            {
-                "type": "Feature",
-                "properties": { "name": "Axe Nord (Cité Soleil / Tabarre)" },
-                "geometry": {
-                    "type": "LineString",
-                    "coordinates": [[-72.3412, 18.5851], [-72.3114, 18.6042], [-72.2891, 18.5884], [-72.260, 18.585]]
-                }
-            },
-            {
-                "type": "Feature",
-                "properties": { "name": "Axe Central (Delmas / Port-au-Prince)" },
-                "geometry": {
-                    "type": "LineString",
-                    "coordinates": [[-72.3584, 18.5492], [-72.3162, 18.5381], [-72.2862, 18.5315], [-72.245, 18.545]]
-                }
-            },
-            {
-                "type": "Feature",
-                "properties": { "name": "Axe Sud (Carrefour / Pétion-Ville)" },
-                "geometry": {
-                    "type": "LineString",
-                    "coordinates": [[-72.410, 18.535], [-72.350, 18.510], [-72.3014, 18.5142], [-72.2594, 18.4912]]
-                }
-            },
-            {
-                "type": "Feature",
-                "properties": { "name": "Liaison Croix-des-Bouquets" },
-                "geometry": {
-                    "type": "LineString",
-                    "coordinates": [[-72.260, 18.585], [-72.235, 18.575], [-72.210, 18.600]]
-                }
-            }
-        ]
-    };
+    // 3. Animation de zoom vers la capitale + Verrouillage de la zone
+    setTimeout(() => {
+        // Le grand plongeon fluide vers Port-au-Prince
+        map.flyTo([18.5410, -72.3150], 12.5, {
+            animate: true,
+            duration: 2.5
+        });
 
-    // 4. Dessiner les lignes avec l'effet lumineux Bleu Roi
-    L.geoJSON(neonBoundaries, {
-        style: function() {
-            return {
-                color: "#4169E1",       // Bleu Roi Principal
-                weight: 3.5,            // Ligne fine mais visible
-                opacity: 0.9,
-                className: 'neon-line'  // Applique l'effet de lueur CSS
-            };
-        },
-        onEachFeature: function(feature, layer) {
-            // Rendre la ligne interactive au survol/clic
-            layer.on('mouseover', function() {
-                this.setStyle({ color: '#00D2FF', weight: 5 }); // Devient cyan électrique au survol
-            });
-            layer.on('mouseout', function() {
-                this.setStyle({ color: '#4169E1', weight: 3.5 }); // Reprend son bleu roi
-            });
-            layer.on('click', function() {
-                if (window.FlutterFlowHorizPlatform && window.FlutterFlowHorizPlatform.postMessage) {
-                    window.FlutterFlowHorizPlatform.postMessage(feature.properties.name);
-                }
-            });
-        }
-    }).addTo(map);
+        // Dès que l'animation est finie, on active le "piège" (limites strictes)
+        map.once('moveend', function() {
+            // Définition de la zone maximale autorisée (Aire Métropolitaine uniquement)
+            const southWest = L.latLng(18.4400, -72.4300);
+            const northEast = L.latLng(18.6300, -72.1800);
+            const bounds = L.latLngBounds(southWest, northEast);
+            
+            // On applique le verrouillage
+            map.setMaxBounds(bounds);
+            map.setMinZoom(12); // Empêche de dézoomer et de revoir le reste d'Haïti vide
+            
+            console.log("Carte verrouillée sur les 8 secteurs.");
+        });
 
+    }, 1000); // Attend 1 seconde avant de plonger
 </script>
 </body>
 </html>
