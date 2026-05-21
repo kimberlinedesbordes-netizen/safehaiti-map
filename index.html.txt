@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SafeHaiti Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body, html, #map { margin: 0; padding: 0; height: 100%; width: 100%; background-color: #121212; }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Initialisation centrée sur Port-au-Prince
+        var map = L.map('map', { zoomControl: false, attributionControl: false }).setView([18.5392, -72.3350], 12);
+
+        // Simulation d'une zone électorale (Un carré orange pour Delmas)
+        var delmasBounds = [[18.53, -72.35], [18.56, -72.31]];
+        var zoneDelmas = L.rectangle(delmasBounds, {
+            color: "#2C3E50", weight: 2, fillColor: "#E67E22", fillOpacity: 0.5
+        }).addTo(map);
+
+        // Ajout d'un texte "Delmas" au centre
+        zoneDelmas.bindTooltip("Delmas", { permanent: true, direction: "center", className: "labels" }).openTooltip();
+
+        // Gestion du clic pour FlutterFlow
+        zoneDelmas.on('click', function() {
+            var msg = "Delmas";
+            if (window.FlutterFlowHoriz) { window.FlutterFlowHoriz.postMessage(msg); }
+            else if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.flutterFlow) {
+                window.webkit.messageHandlers.flutterFlow.postMessage(msg);
+            } else {
+                alert("Clic sur : " + msg); // Pour tester sur ton navigateur d'ordinateur
+            }
+        });
+    </script>
+    <style>
+        /* Style du texte Delmas (épuré, blanc, sans fond de boîte) */
+        .labels { background: transparent; border: none; box-shadow: none; color: white; font-weight: bold; font-size: 14px; font-family: sans-serif; }
+    </style>
+</body>
+</html>
