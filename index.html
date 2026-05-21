@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SafeHaiti - Étape 1 (Hatte Incluse)</title>
+    <title>SafeHaiti - Tracé Frontière Nord</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
@@ -17,6 +17,11 @@
         .leaflet-container {
             background: #121212 !important;
         }
+        /* Effet néon Bleu Roi ultra-moderne */
+        .neon-border {
+            filter: drop-shadow(0px 0px 4px rgba(65, 105, 225, 0.9)) 
+                    drop-shadow(0px 0px 8px rgba(65, 105, 225, 0.6));
+        }
     </style>
 </head>
 <body>
@@ -24,10 +29,10 @@
 <div id="map"></div>
 
 <script>
-    // 1. Vue initiale : Toute l'île d'Haïti au démarrage
+    // 1. Initialisation et recentrage automatique
     const map = L.map('map', {
-        center: [18.9712, -72.2852],
-        zoom: 8,
+        center: [18.5600, -72.2900],
+        zoom: 12.0,
         zoomControl: false,
         attributionControl: false
     });
@@ -37,29 +42,41 @@
         maxZoom: 19
     }).addTo(map);
 
-    // 3. Animation vers la capitale et Verrouillage élargi
-    setTimeout(() => {
-        // On recule un tout petit peu le zoom initial (12.0 au lieu de 12.5) 
-        // pour que Hatte, Moler et Jammeau soient visibles d'un coup d'œil au Nord
-        map.flyTo([18.5600, -72.2900], 12.0, {
-            animate: true,
-            duration: 2.5
-        });
+    // Verrouillage de la zone (Hatte et Grâce de Dieu incluses)
+    const southWest = L.latLng(18.4400, -72.4300);
+    const northEast = L.latLng(18.7000, -72.1800);
+    const bounds = L.latLngBounds(southWest, northEast);
+    map.setMaxBounds(bounds);
+    map.setMinZoom(11.5);
 
-        map.once('moveend', function() {
-            // ÉLARGISSEMENT DES BORNES :
-            // On fait monter le Nord à 18.7000 (au lieu de 18.6300) pour libérer Hatte et ses environs
-            const southWest = L.latLng(18.4400, -72.4300);
-            const northEast = L.latLng(18.7000, -72.1800); 
-            const bounds = L.latLngBounds(southWest, northEast);
-            
-            map.setMaxBounds(bounds);
-            map.setMinZoom(11.5); // Permet un dézoom très léger pour le confort visuel
-            
-            console.log("Carte verrouillée. Zone Nord élargie pour inclure Hatte.");
-        });
+    // 3. Coordonnées de la ligne Nord (Chirurgie visuelle)
+    // Ce tracé part de la côte ouest, passe au-dessus de Jammeau/Moler, survole Hatte et englobe Grâce de Dieu
+    const northFrontierCoords = [
+        [18.5850, -72.3450], // Point de départ à la mer (Nord de Cité Soleil)
+        [18.5980, -72.3250], // Courbe au-dessus de Jammeau
+        [18.6120, -72.3050], // Ligne qui passe au-dessus de Moler
+        [18.6250, -72.2900], // Sommet Nord juste au-dessus de HATTE
+        [18.6180, -72.2600], // Redescente pour englober GRÂCE DE DIEU
+        [18.5950, -72.2300]  // Fin de la frontière Nord-Est (Canaan Est)
+    ];
 
-    }, 1000);
+    // 4. Création et affichage de la ligne de lumière Bleu Roi
+    const northLine = L.polyline(northFrontierCoords, {
+        color: "#4169E1",         // Bleu Roi Électrique
+        weight: 4,                // Fine et tranchante
+        opacity: 0.9,
+        className: 'neon-border'  // Activation de la lueur CSS
+    }).addTo(map);
+
+    // Petit effet interactif si on clique sur la frontière
+    northLine.on('click', function() {
+        if (window.FlutterFlowHorizPlatform && window.FlutterFlowHorizPlatform.postMessage) {
+            window.FlutterFlowHorizPlatform.postMessage("Frontière Nord");
+        } else {
+            console.log("Clic détecté sur la Frontière Nord");
+        }
+    });
+
 </script>
 </body>
 </html>
