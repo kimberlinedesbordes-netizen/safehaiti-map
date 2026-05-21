@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SafeHaiti - Tracé Frontière Nord</title>
+    <title>SafeHaiti - Studio de Traçage</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
@@ -17,66 +17,87 @@
         .leaflet-container {
             background: #121212 !important;
         }
-        /* Effet néon Bleu Roi ultra-moderne */
+        /* Style du panneau de contrôle des coordonnées */
+        #coord-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(20, 20, 25, 0.95);
+            border: 1px solid #4169E1;
+            box-shadow: 0 0 15px rgba(65, 105, 225, 0.4);
+            color: #ffffff;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 11px;
+            z-index: 1000;
+            width: 85%;
+            max-height: 150px;
+            overflow-y: auto;
+        }
         .neon-border {
-            filter: drop-shadow(0px 0px 4px rgba(65, 105, 225, 0.9)) 
-                    drop-shadow(0px 0px 8px rgba(65, 105, 225, 0.6));
+            filter: drop-shadow(0px 0px 4px rgba(65, 105, 225, 0.9));
         }
     </style>
 </head>
 <body>
 
 <div id="map"></div>
+<div id="coord-panel">
+    <strong>Studio de Traçage SafeHaiti</strong><br>
+    Clique sur la carte pour dessiner la frontière Nord (Passe par Jammeau, Hatte, Grâce de Dieu).<br>
+    <span id="output">[]</span>
+</div>
 
 <script>
-    // 1. Initialisation et recentrage automatique
     const map = L.map('map', {
-        center: [18.5600, -72.2900],
+        center: [18.5700, -72.2900], // Centré un peu plus haut pour bien voir le Nord
         zoom: 12.0,
         zoomControl: false,
         attributionControl: false
     });
 
-    // 2. Fond de carte sombre
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         maxZoom: 19
     }).addTo(map);
 
-    // Verrouillage de la zone (Hatte et Grâce de Dieu incluses)
-    const southWest = L.latLng(18.4400, -72.4300);
-    const northEast = L.latLng(18.7000, -72.1800);
-    const bounds = L.latLngBounds(southWest, northEast);
-    map.setMaxBounds(bounds);
-    map.setMinZoom(11.5);
-
-    // 3. Coordonnées de la ligne Nord (Chirurgie visuelle)
-    // Ce tracé part de la côte ouest, passe au-dessus de Jammeau/Moler, survole Hatte et englobe Grâce de Dieu
-    const northFrontierCoords = [
-        [18.5850, -72.3450], // Point de départ à la mer (Nord de Cité Soleil)
-        [18.5980, -72.3250], // Courbe au-dessus de Jammeau
-        [18.6120, -72.3050], // Ligne qui passe au-dessus de Moler
-        [18.6250, -72.2900], // Sommet Nord juste au-dessus de HATTE
-        [18.6180, -72.2600], // Redescente pour englober GRÂCE DE DIEU
-        [18.5950, -72.2300]  // Fin de la frontière Nord-Est (Canaan Est)
-    ];
-
-    // 4. Création et affichage de la ligne de lumière Bleu Roi
-    const northLine = L.polyline(northFrontierCoords, {
-        color: "#4169E1",         // Bleu Roi Électrique
-        weight: 4,                // Fine et tranchante
-        opacity: 0.9,
-        className: 'neon-border'  // Activation de la lueur CSS
+    // Tableau pour stocker tes points cliqués
+    let clickedCoords = [];
+    let activeLine = L.polyline([], {
+        color: "#4169E1",
+        weight: 4,
+        className: 'neon-border'
     }).addTo(map);
 
-    // Petit effet interactif si on clique sur la frontière
-    northLine.on('click', function() {
-        if (window.FlutterFlowHorizPlatform && window.FlutterFlowHorizPlatform.postMessage) {
-            window.FlutterFlowHorizPlatform.postMessage("Frontière Nord");
-        } else {
-            console.log("Clic détecté sur la Frontière Nord");
-        }
-    });
+    // Fonction qui capture tes clics en direct
+    map.on('click', function(e) {
+        const lat = parseFloat(e.latlng.lat.toFixed(5));
+        const lng = parseFloat(e.latlng.lng.toFixed(5));
+        
+        // Ajoute le point
+        clickedCoords.push([lat, lng]);
+        
+        // Met à jour la ligne sur ton écran
+        activeLine.setLatLngs(clickedCoords);
+        
+        // Ajoute un petit point de repère visuel
+        L.circleMarker(e.latlng, {
+            radius: 4,
+            fillColor: '#00D2FF',
+            color: '#4169E1',
+            weight: 1,
+            fillOpacity: 1
+        }).addTo(map);
 
+        // Affiche la liste des coordonnées dans la boîte en bas
+        let textOutput = "[\n";
+        clickedCoords.forEach((coord, index) => {
+            textOutput += `  [${coord[0]}, ${coord[1]}]${index < clickedCoords.length - 1 ? ',' : ''}\n`;
+        });
+        textOutput += "]";
+        document.getElementById('output').innerText = textOutput;
+    });
 </script>
 </body>
 </html>
