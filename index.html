@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SafeHaiti - Étape 1</title>
+    <title>SafeHaiti - Étape 1 (Hatte Incluse)</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
@@ -24,7 +24,7 @@
 <div id="map"></div>
 
 <script>
-    // 1. Vue initiale : Très large sur toute l'île d'Haïti au démarrage
+    // 1. Vue initiale : Toute l'île d'Haïti au démarrage
     const map = L.map('map', {
         center: [18.9712, -72.2852],
         zoom: 8,
@@ -32,34 +32,34 @@
         attributionControl: false
     });
 
-    // 2. Fond de carte sombre et moderne
+    // 2. Fond de carte sombre
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         maxZoom: 19
     }).addTo(map);
 
-    // 3. Animation de zoom vers la capitale + Verrouillage de la zone
+    // 3. Animation vers la capitale et Verrouillage élargi
     setTimeout(() => {
-        // Le grand plongeon fluide vers Port-au-Prince
-        map.flyTo([18.5410, -72.3150], 12.5, {
+        // On recule un tout petit peu le zoom initial (12.0 au lieu de 12.5) 
+        // pour que Hatte, Moler et Jammeau soient visibles d'un coup d'œil au Nord
+        map.flyTo([18.5600, -72.2900], 12.0, {
             animate: true,
             duration: 2.5
         });
 
-        // Dès que l'animation est finie, on active le "piège" (limites strictes)
         map.once('moveend', function() {
-            // Définition de la zone maximale autorisée (Aire Métropolitaine uniquement)
+            // ÉLARGISSEMENT DES BORNES :
+            // On fait monter le Nord à 18.7000 (au lieu de 18.6300) pour libérer Hatte et ses environs
             const southWest = L.latLng(18.4400, -72.4300);
-            const northEast = L.latLng(18.6300, -72.1800);
+            const northEast = L.latLng(18.7000, -72.1800); 
             const bounds = L.latLngBounds(southWest, northEast);
             
-            // On applique le verrouillage
             map.setMaxBounds(bounds);
-            map.setMinZoom(12); // Empêche de dézoomer et de revoir le reste d'Haïti vide
+            map.setMinZoom(11.5); // Permet un dézoom très léger pour le confort visuel
             
-            console.log("Carte verrouillée sur les 8 secteurs.");
+            console.log("Carte verrouillée. Zone Nord élargie pour inclure Hatte.");
         });
 
-    }, 1000); // Attend 1 seconde avant de plonger
+    }, 1000);
 </script>
 </body>
 </html>
