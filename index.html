@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SafeHaiti Map - Vraies Frontieres</title>
+    <title>SafeHaiti - Neon Matrix</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
@@ -12,10 +12,15 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            background-color: #121212;
+            background-color: #0d0d11;
         }
         .leaflet-container {
-            background: #121212 !important;
+            background: #0d0d11 !important;
+        }
+        /* Effet de lueur Néon Bleu Roi sur les lignes */
+        .neon-line {
+            filter: drop-shadow(0px 0px 5px rgba(65, 105, 225, 0.9)) 
+                    drop-shadow(0px 0px 10px rgba(0, 210, 255, 0.6));
         }
     </style>
 </head>
@@ -24,103 +29,85 @@
 <div id="map"></div>
 
 <script>
-    // 1. Initialisation centrée sur Port-au-Prince
+    // 1. Initialisation de la carte
     const map = L.map('map', {
         center: [18.5410, -72.3150],
-        zoom: 12.5, // Zoom parfait pour voir les détails des rues
+        zoom: 12.5,
         zoomControl: false,
         attributionControl: false
     });
 
-    // 2. Fond de carte sombre
+    // 2. Fond de carte "Noire Absolue" pour faire ressortir le néon
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        maxZoom: 19
+        maxZoom: 19,
+        opacity: 0.7
     }).addTo(map);
 
-    // 3. Données des vraies formes naturelles (Tracé chirurgical)
-    const realCommunesData = {
+    // 3. Tracé des axes de délimitation de la Capitale
+    const neonBoundaries = {
         "type": "FeatureCollection",
         "features": [
             {
                 "type": "Feature",
-                "properties": { "name": "Delmas", "color": "#FF9800" }, // Orange
+                "properties": { "name": "Axe Nord (Cité Soleil / Tabarre)" },
                 "geometry": {
-                    "type": "Polygon",
-                    "coordinates": [[
-                        [-72.3162, 18.5635], [-72.3081, 18.5671], [-72.2965, 18.5684], 
-                        [-72.2894, 18.5642], [-72.2831, 18.5521], [-72.2862, 18.5315], 
-                        [-72.3014, 18.5142], [-72.3115, 18.5195], [-72.3174, 18.5381], 
-                        [-72.3162, 18.5635]
-                    ]]
+                    "type": "LineString",
+                    "coordinates": [[-72.3412, 18.5851], [-72.3114, 18.6042], [-72.2891, 18.5884], [-72.260, 18.585]]
                 }
             },
             {
                 "type": "Feature",
-                "properties": { "name": "Port-au-Prince", "color": "#E53935" }, // Rouge
+                "properties": { "name": "Axe Central (Delmas / Port-au-Prince)" },
                 "geometry": {
-                    "type": "Polygon",
-                    "coordinates": [[
-                        [-72.3584, 18.5492], [-72.3312, 18.5485], [-72.3162, 18.5381], 
-                        [-72.3115, 18.5195], [-72.3241, 18.5042], [-72.3482, 18.5091], 
-                        [-72.3615, 18.5274], [-72.3584, 18.5492]
-                    ]]
+                    "type": "LineString",
+                    "coordinates": [[-72.3584, 18.5492], [-72.3162, 18.5381], [-72.2862, 18.5315], [-72.245, 18.545]]
                 }
             },
             {
                 "type": "Feature",
-                "properties": { "name": "Cité Soleil", "color": "#E53935" }, // Rouge
+                "properties": { "name": "Axe Sud (Carrefour / Pétion-Ville)" },
                 "geometry": {
-                    "type": "Polygon",
-                    "coordinates": [[
-                        [-72.3412, 18.5851], [-72.3114, 18.6042], [-72.2891, 18.5884], 
-                        [-72.2894, 18.5642], [-72.2965, 18.5684], [-72.3081, 18.5671], 
-                        [-72.3162, 18.5635], [-72.3412, 18.5851]
-                    ]]
+                    "type": "LineString",
+                    "coordinates": [[-72.410, 18.535], [-72.350, 18.510], [-72.3014, 18.5142], [-72.2594, 18.4912]]
                 }
             },
             {
                 "type": "Feature",
-                "properties": { "name": "Pétion-Ville", "color": "#4CAF50" }, // Vert
+                "properties": { "name": "Liaison Croix-des-Bouquets" },
                 "geometry": {
-                    "type": "Polygon",
-                    "coordinates": [[
-                        [-72.3014, 18.5142], [-72.2862, 18.5315], [-72.2712, 18.5241], 
-                        [-72.2594, 18.4912], [-72.2881, 18.4814], [-72.3042, 18.4982], 
-                        [-72.3014, 18.5142]
-                    ]]
+                    "type": "LineString",
+                    "coordinates": [[-72.260, 18.585], [-72.235, 18.575], [-72.210, 18.600]]
                 }
             }
         ]
     };
 
-    // 4. Dessiner les formes et froncer sur les lignes de base
-    L.geoJSON(realCommunesData, {
-        style: function(feature) {
+    // 4. Dessiner les lignes avec l'effet lumineux Bleu Roi
+    L.geoJSON(neonBoundaries, {
+        style: function() {
             return {
-                color: "#ffffff",          // Ligne blanche fine qui s'aligne sur ton fond
-                weight: 1.5,               // Épaisseur discrète
-                opacity: 0.5,              // Fusionne avec le fond
-                fillColor: feature.properties.color, 
-                fillOpacity: 0.35          // Transparence pour laisser voir les rues dessous
+                color: "#4169E1",       // Bleu Roi Principal
+                weight: 3.5,            // Ligne fine mais visible
+                opacity: 0.9,
+                className: 'neon-line'  // Applique l'effet de lueur CSS
             };
         },
         onEachFeature: function(feature, layer) {
+            // Rendre la ligne interactive au survol/clic
+            layer.on('mouseover', function() {
+                this.setStyle({ color: '#00D2FF', weight: 5 }); // Devient cyan électrique au survol
+            });
+            layer.on('mouseout', function() {
+                this.setStyle({ color: '#4169E1', weight: 3.5 }); // Reprend son bleu roi
+            });
             layer.on('click', function() {
-                selectCommune(feature.properties.name);
+                if (window.FlutterFlowHorizPlatform && window.FlutterFlowHorizPlatform.postMessage) {
+                    window.FlutterFlowHorizPlatform.postMessage(feature.properties.name);
+                }
             });
         }
     }).addTo(map);
 
-    // Passerelle FlutterFlow
-    function selectCommune(name) {
-        if (window.FlutterFlowHorizPlatform && window.FlutterFlowHorizPlatform.postMessage) {
-            window.FlutterFlowHorizPlatform.postMessage(name);
-        } else if (window.chrome && window.chrome.webview) {
-            window.chrome.webview.postMessage(name);
-        } else {
-            console.log("Zone cliquée : " + name);
-        }
-    }
 </script>
 </body>
 </html>
