@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SafeHaiti - Studio Secteur 2</title>
+    <title>SafeHaiti - Studio Secteur 3</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
@@ -23,8 +23,8 @@
             left: 50%;
             transform: translateX(-50%);
             background: rgba(20, 20, 25, 0.95);
-            border: 1px solid #00D2FF;
-            box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+            border: 1px solid #FF007F;
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.4);
             color: #ffffff;
             padding: 15px;
             border-radius: 8px;
@@ -34,8 +34,8 @@
             width: 85%;
         }
         button {
-            background: #00D2FF;
-            color: #121212;
+            background: #FF007F;
+            color: white;
             border: none;
             padding: 5px 10px;
             border-radius: 4px;
@@ -44,31 +44,29 @@
             margin-top: 5px;
         }
         button:hover {
-            background: #4169E1;
-            color: white;
+            background: #ffffff;
+            color: #FF007F;
         }
-        .neon-royal {
-            filter: drop-shadow(0px 0px 5px rgba(65, 105, 225, 0.9));
-        }
-        .neon-cyan {
-            filter: drop-shadow(0px 0px 5px rgba(0, 210, 255, 0.9));
-        }
+        .neon-royal { filter: drop-shadow(0px 0px 5px rgba(65, 105, 225, 0.9)); }
+        .neon-cyan { filter: drop-shadow(0px 0px 5px rgba(0, 210, 255, 0.9)); }
+        .neon-magenta { filter: drop-shadow(0px 0px 5px rgba(255, 0, 127, 0.9)); }
     </style>
 </head>
 <body>
 
 <div id="map"></div>
 <div id="studio-panel">
-    <strong>Secteur 1 (Croix-des-Bouquets) : <span style="color:#4169E1;">SAUVEGARDÉ</span></strong><br>
-    <span style="color:#00D2FF;">En cours : Secteur 2 (Trace le contour de Cité Soleil / Tabarre)</span><br>
+    <strong>S1 (Croix-des-Bouquets) : <span style="color:#4169E1;">SAUVÉ 🔵</span></strong><br>
+    <strong>S2 (Cité Soleil) : <span style="color:#00D2FF;">SAUVÉ 🌐</span></strong><br>
+    <span style="color:#FF007F;">En cours : Secteur 3 (Trace en Rose/Magenta)</span><br>
     <button id="undo-btn">↩️ Annuler le dernier point</button>
     <pre id="output" style="margin-top:10px; max-height: 80px; overflow-y:auto;">[]</pre>
 </div>
 
 <script>
     const map = L.map('map', {
-        center: [18.5750, -72.2900], 
-        zoom: 12.0,
+        center: [18.5600, -72.3100], // Légèrement repositionné pour voir le cœur de la ville
+        zoom: 12.5,
         zoomControl: false,
         attributionControl: false
     });
@@ -78,60 +76,51 @@
     }).addTo(map);
 
     // ==========================================
-    // SECTEUR 1 : TES COORDONNÉES FINALES FIGÉES
+    // SECTEUR 1 : FIGÉ (Bleu Roi)
     // ==========================================
-    const secteur1Coords = [
-        [18.68203, -72.32609],[18.68796, -72.32497],[18.69064, -72.32162],[18.69227, -72.31879],[18.69316, -72.31622],[18.69154, -72.31339],[18.6904, -72.31081],[18.68894, -72.30669],[18.69122, -72.29673],[18.68464, -72.29382],[18.68911, -72.28712],[18.68699, -72.28369],[18.67781, -72.2703],[18.67441, -72.24232],[18.69911, -72.22876],[18.70123, -72.21622],[18.6905, -72.19666],[18.66369, -72.17915],[18.63443, -72.17417],[18.61573, -72.15443],[18.60955, -72.12782],[18.58663, -72.13898],[18.57655, -72.12164],[18.56324, -72.13846],[18.55307, -72.14387],[18.51957, -72.15202],[18.49455, -72.1946],[18.53359, -72.21554],[18.54401, -72.22378],[18.5539, -72.22867],[18.57, -72.23082],[18.56626, -72.23545],[18.57309, -72.2412],[18.57766, -72.24266],[18.57921, -72.24478],[18.58088, -72.24811],[18.5811, -72.24863],[18.58285, -72.24848],[18.5848, -72.24764],[18.58484, -72.24702],[18.58224, -72.242],[18.58224, -72.242],[18.58204, -72.23854],[18.57893, -72.23421],[18.57653, -72.23073],[18.58472, -72.22708],[18.59063, -72.22618],[18.59522, -72.22468],[18.59998, -72.22343],[18.60416, -72.22142],[18.61388, -72.21661],[18.62469, -72.2303],[18.63502, -72.25296],[18.64799, -72.25901],[18.64746, -72.26395],[18.64575, -72.2706],[18.64384, -72.27502],[18.64976, -72.28283],[18.65634, -72.28669],[18.65918, -72.29073],[18.66487, -72.29699],[18.66885, -72.3018],[18.67096, -72.30815],[18.67381, -72.31287],[18.67592, -72.31716],[18.6795, -72.32051],[18.68197, -72.32608]
+    const s1Coords = [
+        [18.68203, -72.32609],[18.68796, -72.32497],[18.69064, -72.32162],[18.69227, -72.31879],[18.69316, -72.31622],[18.69154, -72.31339],[18.6904, -72.31081],[18.68894, -72.30669],[18.69122, -72.29673],[18.68464, -72.29382],[18.68911, -72.28712],[18.68699, -72.28369],[18.67781, -72.2703],[18.67441, -72.24232],[18.69911, -72.22876],[18.70123, -72.21622],[18.6905, -72.19666],[18.66369, -72.17915],[18.63443, -72.17417],[18.61573, -72.15443],[18.60955, -72.12782],[18.58663, -72.13898],[18.57655, -72.12164],[18.56324, -72.13846],[18.55307, -72.14387],[18.51957, -72.15202],[18.49455, -72.1946],[18.53359, -72.21554],[18.54401, -72.22378],[18.5539, -72.22867],[18.57, -72.23082],[18.56626, -72.23545],[18.57309, -72.2412],[18.57766, -72.24266],[18.57921, -72.24478],[18.58088, -72.24811],[18.5811, -72.24863],[18.58285, -72.24848],[18.5848, -72.24764],[18.58484, -72.24702],[18.58224, -72.242],[18.58204, -72.23854],[18.57893, -72.23421],[18.57653, -72.23073],[18.58472, -72.22708],[18.59063, -72.22618],[18.59522, -72.22468],[18.59998, -72.22343],[18.60416, -72.22142],[18.61388, -72.21661],[18.62469, -72.2303],[18.63502, -72.25296],[18.64799, -72.25901],[18.64746, -72.26395],[18.64575, -72.2706],[18.64384, -72.27502],[18.64976, -72.28283],[18.65634, -72.28669],[18.65918, -72.29073],[18.66487, -72.29699],[18.66885, -72.3018],[18.67096, -72.30815],[18.67381, -72.31287],[18.67592, -72.31716],[18.6795, -72.32051],[18.68197, -72.32608]
     ];
-
-    // Affichage permanent du Secteur 1 en Bleu Roi Néon
-    L.polyline(secteur1Coords, {
-        color: "#4169E1",
-        weight: 4,
-        className: 'neon-royal'
-    }).addTo(map);
-
+    L.polyline(s1Coords, { color: "#4169E1", weight: 4, className: 'neon-royal' }).addTo(map);
 
     // ==========================================
-    // STUDIO POUR LE SECTEUR 2 (Cité Soleil / Tabarre)
+    // SECTEUR 2 : FIGÉ (Cyan)
     // ==========================================
-    let secteur2Coords = [];
+    const s2Coords = [
+        [18.67873, -72.32094],[18.66475, -72.31665],[18.65841, -72.31802],[18.65256, -72.33038],[18.64541, -72.3369],[18.62671, -72.34737],[18.62834, -72.35767],[18.62054, -72.35064],[18.61501, -72.35064],[18.60119, -72.34583],[18.58151, -72.34102],[18.57321, -72.34935],[18.5689, -72.3527],[18.56605, -72.35312],[18.56434, -72.353],[18.56482, -72.34847],[18.56295, -72.34109],[18.56584, -72.3369],[18.56609, -72.33295],[18.5669, -72.32665],[18.56694, -72.32356],[18.56503, -72.31768],[18.56442, -72.31489],[18.56633, -72.31274],[18.5741, -72.30515],[18.58019, -72.31197],[18.5808, -72.31154],[18.58422, -72.30201],[18.58808, -72.29442],[18.5928, -72.28978],[18.5954, -72.28588],[18.59764, -72.28515],[18.59699, -72.28935],[18.59788, -72.29034],[18.59884, -72.29394],[18.59913, -72.29562],[18.59913, -72.29794],[18.59962, -72.30291],[18.6032, -72.30444],[18.60543, -72.3057],[18.60578, -72.30826],[18.60511, -72.31092],[18.6045, -72.31277],[18.60468, -72.31454],[18.60635, -72.31637],[18.60765, -72.31639],[18.60923, -72.31575],[18.60931, -72.31956],[18.61167, -72.32454],[18.61777, -72.32849],[18.63362, -72.32609],[18.66458, -72.30995],[18.67897, -72.32102]
+    ];
+    L.polyline(s2Coords, { color: "#00D2FF", weight: 4, className: 'neon-cyan' }).addTo(map);
+
+    // ==========================================
+    // INTERACTIF : SECTEUR 3 (Rose/Magenta)
+    // ==========================================
+    let s3Coords = [];
     let markersGroup = L.layerGroup().addTo(map);
-    let activeLine = L.polyline([], {
-        color: "#00D2FF", // Tracé en Cyan pour bien différencier pendant que tu dessines
-        weight: 4,
-        className: 'neon-cyan'
-    }).addTo(map);
+    let activeLine = L.polyline([], { color: "#FF007F", weight: 4, className: 'neon-magenta' }).addTo(map);
 
     map.on('click', function(e) {
         const lat = parseFloat(e.latlng.lat.toFixed(5));
         const lng = parseFloat(e.latlng.lng.toFixed(5));
-        secteur2Coords.push([lat, lng]);
+        s3Coords.push([lat, lng]);
         updateMap();
     });
 
     document.getElementById('undo-btn').addEventListener('click', function(e) {
         e.stopPropagation();
-        secteur2Coords.pop();
+        s3Coords.pop();
         updateMap();
     });
 
     function updateMap() {
-        activeLine.setLatLngs(secteur2Coords);
+        activeLine.setLatLngs(s3Coords);
         markersGroup.clearLayers();
-        secteur2Coords.forEach(coord => {
-            L.circleMarker(coord, {
-                radius: 4,
-                fillColor: '#ffffff',
-                color: '#00D2FF',
-                weight: 1,
-                fillOpacity: 1
-            }).addTo(markersGroup);
+        s3Coords.forEach(coord => {
+            L.circleMarker(coord, { radius: 4, fillColor: '#ffffff', color: '#FF007F', weight: 1, fillOpacity: 1 }).addTo(markersGroup);
         });
 
         let textOutput = "[\n";
-        secteur2Coords.forEach((coord, index) => {
-            textOutput += `  [${coord[0]}, ${coord[1]}]${index < secteur2Coords.length - 1 ? ',' : ''}\n`;
+        s3Coords.forEach((coord, index) => {
+            textOutput += `  [${coord[0]}, ${coord[1]}]${index < s3Coords.length - 1 ? ',' : ''}\n`;
         });
         textOutput += "]";
         document.getElementById('output').innerText = textOutput;
