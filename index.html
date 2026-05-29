@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SafeHaiti - Studio Secteur 4 Nettoyé</title>
+    <title>SafeHaiti - Focus Delmas</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
@@ -23,8 +23,8 @@
             left: 50%;
             transform: translateX(-50%);
             background: rgba(20, 20, 25, 0.95);
-            border: 1px solid #39FF14;
-            box-shadow: 0 0 15px rgba(57, 255, 20, 0.4);
+            border: 1px solid #FF007F;
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.4);
             color: #ffffff;
             padding: 15px;
             border-radius: 8px;
@@ -34,8 +34,8 @@
             width: 85%;
         }
         button {
-            background: #39FF14;
-            color: #121212;
+            background: #FF007F;
+            color: white;
             border: none;
             padding: 5px 10px;
             border-radius: 4px;
@@ -45,12 +45,12 @@
         }
         button:hover {
             background: #ffffff;
-            color: #39FF14;
+            color: #FF007F;
         }
         .neon-royal { filter: drop-shadow(0px 0px 5px rgba(65, 105, 225, 0.9)); }
         .neon-cyan { filter: drop-shadow(0px 0px 5px rgba(0, 210, 255, 0.9)); }
-        .neon-magenta { filter: drop-shadow(0px 0px 5px rgba(255, 0, 127, 0.9)); }
         .neon-green { filter: drop-shadow(0px 0px 5px rgba(57, 255, 20, 0.9)); }
+        .neon-magenta { filter: drop-shadow(0px 0px 5px rgba(255, 0, 127, 0.9)); }
     </style>
 </head>
 <body>
@@ -59,16 +59,17 @@
 <div id="studio-panel">
     <strong>S1 (Croix-des-Bouquets) : <span style="color:#4169E1;">SAUVÉ 🔵</span></strong> | 
     <strong>S2 (Cité Soleil) : <span style="color:#00D2FF;">SAUVÉ 🌐</span></strong><br>
-    <strong>S3 (Tabarre) : <span style="color:#FF007F;">SAUVÉ 🔴</span></strong><br>
-    <span style="color:#39FF14;">En cours : Secteur 4 (Trace Delmas en Vert - Prêt et Nettoyé)</span><br>
+    <strong>S4 (Delmas) : <span style="color:#39FF14;">AFFICHÉ (39 pts) 🟢</span></strong><br>
+    <span style="color:#FF007F;">Studio Actif : Prêt pour le secteur suivant (Rose)</span><br>
     <button id="undo-btn">↩️ Annuler le dernier point</button>
     <pre id="output" style="margin-top:10px; max-height: 80px; overflow-y:auto;">[]</pre>
 </div>
 
 <script>
+    // Ajustement du centre directement sur Delmas [18.5470, -72.2700] pour bien voir ton tracé !
     const map = L.map('map', {
-        center: [18.5550, -72.2950], 
-        zoom: 13.0,
+        center: [18.5470, -72.2700], 
+        zoom: 13.5,
         zoomControl: false,
         attributionControl: false
     });
@@ -94,43 +95,43 @@
     L.polyline(s2Coords, { color: "#00D2FF", weight: 4, className: 'neon-cyan' }).addTo(map);
 
     // ==========================================
-    // SECTEUR 3 : Tabarre (Magenta/Rose)
+    // SECTEUR 4 : Delmas (Vert Néon) - TES 39 COORDONNÉES IMPORTÉES ICI
     // ==========================================
-    const s3Coords = [
+    const s4Coords = [
         [18.57487, -72.306],[18.57548, -72.30502],[18.57491, -72.30412],[18.57436, -72.30111],[18.57367, -72.29851],[18.57305, -72.2963],[18.57267, -72.2946],[18.57246, -72.29275],[18.57211, -72.2918],[18.57101, -72.29047],[18.57089, -72.28903],[18.57074, -72.28719],[18.5704, -72.2859],[18.56938, -72.28487],[18.56818, -72.28375],[18.56706, -72.28467],[18.56535, -72.28528],[18.56252, -72.28579],[18.56136, -72.28594],[18.55925, -72.28781],[18.55803, -72.28922],[18.55652, -72.28897],[18.55409, -72.28909],[18.55067, -72.2839],[18.54583, -72.27995],[18.54416, -72.27249],[18.54213, -72.25549],[18.53966, -72.24951],[18.53647, -72.24472],[18.53232, -72.2479],[18.53133, -72.24805],[18.53052, -72.2476],[18.53333, -72.24459],[18.53532, -72.24219],[18.53976, -72.23592],[18.54623, -72.23661],[18.55192, -72.23871],[18.55485, -72.23807],[18.55436, -72.22871]
     ];
-    L.polyline(s3Coords, { color: "#FF007F", weight: 4, className: 'neon-magenta' }).addTo(map);
+    L.polyline(s4Coords, { color: "#39FF14", weight: 4, className: 'neon-green' }).addTo(map);
 
     // ==========================================
-    // INTERACTIF : SECTEUR 4 (Vert Néon - NETTOYÉ SANS LIGNE FORCEE)
+    // INTERACTIF : SECTEUR SUIVANT (Tabarre - Rose/Magenta)
     // ==========================================
-    let s4Coords = [];
+    let s3Coords = [];
     let markersGroup = L.layerGroup().addTo(map);
-    let activeLine = L.polyline([], { color: "#39FF14", weight: 4, className: 'neon-green' }).addTo(map);
+    let activeLine = L.polyline([], { color: "#FF007F", weight: 4, className: 'neon-magenta' }).addTo(map);
 
     map.on('click', function(e) {
         const lat = parseFloat(e.latlng.lat.toFixed(5));
         const lng = parseFloat(e.latlng.lng.toFixed(5));
-        s4Coords.push([lat, lng]);
+        s3Coords.push([lat, lng]);
         updateMap();
     });
 
     document.getElementById('undo-btn').addEventListener('click', function(e) {
         e.stopPropagation();
-        s4Coords.pop();
+        s3Coords.pop();
         updateMap();
     });
 
     function updateMap() {
-        activeLine.setLatLngs(s4Coords);
+        activeLine.setLatLngs(s3Coords);
         markersGroup.clearLayers();
-        s4Coords.forEach(coord => {
-            L.circleMarker(coord, { radius: 4, fillColor: '#ffffff', color: '#39FF14', weight: 1, fillOpacity: 1 }).addTo(markersGroup);
+        s3Coords.forEach(coord => {
+            L.circleMarker(coord, { radius: 4, fillColor: '#ffffff', color: '#FF007F', weight: 1, fillOpacity: 1 }).addTo(markersGroup);
         });
 
         let textOutput = "[\n";
-        s4Coords.forEach((coord, index) => {
-            textOutput += `  [${coord[0]}, ${coord[1]}]${index < s4Coords.length - 1 ? ',' : ''}\n`;
+        s3Coords.forEach((coord, index) => {
+            textOutput += `  [${coord[0]}, ${coord[1]}]${index < s3Coords.length - 1 ? ',' : ''}\n`;
         });
         textOutput += "]";
         document.getElementById('output').innerText = textOutput;
